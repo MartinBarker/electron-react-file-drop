@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
 
-let ipcRenderer;
-if (window.require) {
-  ipcRenderer = window.require('electron').ipcRenderer;
-}
-
 function App() {
   const [files, setFiles] = useState([]);
 
@@ -13,16 +8,24 @@ function App() {
     event.preventDefault();
     const droppedFiles = Array.from(event.dataTransfer.files);
     setFiles(droppedFiles);
-    if (ipcRenderer) {
-      ipcRenderer.send('files-dropped', droppedFiles.map(file => ({ name: file.name, path: file.path })));
+    droppedFiles.forEach(file => {
+      console.log(`File dropped: ${file.name} - ${file.path}`);
+    });
+    if (window.electron) {
+      console.log('Sending files-dropped event to main process');
+      window.electron.sendFiles(droppedFiles.map(file => ({ name: file.name, path: file.path })));
     }
   };
 
   const handleFileSelect = (event) => {
     const selectedFiles = Array.from(event.target.files);
     setFiles(selectedFiles);
-    if (ipcRenderer) {
-      ipcRenderer.send('files-dropped', selectedFiles.map(file => ({ name: file.name, path: file.path })));
+    selectedFiles.forEach(file => {
+      console.log(`File selected: ${file.name} - ${file.path}`);
+    });
+    if (window.electron) {
+      console.log('Sending files-dropped event to main process');
+      window.electron.sendFiles(selectedFiles.map(file => ({ name: file.name, path: file.path })));
     }
   };
 

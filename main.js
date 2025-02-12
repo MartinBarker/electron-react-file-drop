@@ -10,6 +10,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')  // Add this line
     },
   });
 
@@ -30,10 +31,16 @@ function createWindow() {
 }
 
 ipcMain.on('files-dropped', (event, files) => {
-  console.log('Files dropped:', files);
+  console.log('Received files-dropped event');
+  files.forEach(file => {
+    console.log(`File dropped: ${file.name} - ${file.path}`);
+  });
 });
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  console.log('App is ready');
+  createWindow();
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
