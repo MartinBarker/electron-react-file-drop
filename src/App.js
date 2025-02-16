@@ -4,28 +4,50 @@ import './App.css';
 function App() {
   const [files, setFiles] = useState([]);
 
-  const handleDrop = (event) => {
+  const handleDrop = async (event) => {
+    // Get dropped files
     event.preventDefault();
     const droppedFiles = Array.from(event.dataTransfer.files);
-    setFiles(droppedFiles);
-    droppedFiles.forEach(file => {
-      console.log(`File dropped: ${file.name} - ${file.path}`);
+    console.log('Dropped files:', droppedFiles);
+
+    // Send dropped files to backend main.js process
+    window.api.send('get-filepaths', droppedFiles);
+
+    // Handle returned file paths
+    window.api.receive('get-filepaths-response', ( filepathsRsp ) => {
+      console.log('Received file paths:', filepathsRsp);
     });
+    /*
+    setFiles(droppedFiles);
+    for (const file of droppedFiles) {
+      const filePath = await window.electron.getPathForFile(file);
+      console.log(`File dropped: ${file.name} - ${filePath}`);
+    }
     if (window.electron) {
       console.log('Sending files-dropped event to main process');
-      window.electron.sendFiles(droppedFiles.map(file => ({ name: file.name, path: file.path })));
+      const filesWithPaths = await Promise.all(droppedFiles.map(async (file) => ({
+        name: file.name,
+        path: await window.electron.getPathForFile(file)
+      })));
+      window.electron.sendFiles(filesWithPaths);
     }
+      */
   };
 
-  const handleFileSelect = (event) => {
+  const handleFileSelect = async (event) => {
     const selectedFiles = Array.from(event.target.files);
     setFiles(selectedFiles);
-    selectedFiles.forEach(file => {
-      console.log(`File selected: ${file.name} - ${file.path}`);
-    });
+    for (const file of selectedFiles) {
+      const filePath = await window.electron.getPathForFile(file);
+      console.log(`File selected: ${file.name} - ${filePath}`);
+    }
     if (window.electron) {
       console.log('Sending files-dropped event to main process');
-      window.electron.sendFiles(selectedFiles.map(file => ({ name: file.name, path: file.path })));
+      const filesWithPaths = await Promise.all(selectedFiles.map(async (file) => ({
+        name: file.name,
+        path: await window.electron.getPathForFile(file)
+      })));
+      window.electron.sendFiles(filesWithPaths);
     }
   };
 
@@ -45,7 +67,7 @@ function App() {
       </div>
       <ul>
         {files.map((file, index) => (
-          <li key={index}>{file.name} - {file.path}</li>
+          <li key={index}>{file.name}</li>
         ))}
       </ul>
     </div>

@@ -30,11 +30,16 @@ function createWindow() {
   });
 }
 
-ipcMain.on('files-dropped', (event, files) => {
-  console.log('Received files-dropped event');
+ipcMain.on('get-filepaths', (event, files) => {
+  console.log('get-filepaths: ', files);
+
+  // Get filepaths for each file
   files.forEach(file => {
     console.log(`File dropped: ${file.name} - ${file.path}`);
   });
+
+  // Send filepaths back to front end
+  event.reply('get-filepaths-response', ['filepath1','filepath2']);
 });
 
 app.whenReady().then(() => {
