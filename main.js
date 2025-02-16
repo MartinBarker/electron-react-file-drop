@@ -35,7 +35,7 @@ ipcMain.on('get-filepaths', (event, files) => {
 
   // Get filepaths for each file
   files.forEach(file => {
-    console.log(`File dropped: ${file.name} - ${file.path}`);
+    console.log('file = ', file.name)
   });
 
   // Send filepaths back to front end
